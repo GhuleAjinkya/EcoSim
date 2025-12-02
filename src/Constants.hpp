@@ -1,3 +1,4 @@
+#pragma once
 class Constants {
     public:
     // Tile & World
@@ -49,61 +50,7 @@ class Constants {
     static constexpr int HERBIVORE_SPAWN_MAX_GROUP_SIZE = 5;
     static constexpr int HERBIVORE_SPAWN_CLUSTER_RADIUS = 2;  // ±2 tiles around center
     static constexpr int HERBIVORE_MAX_TOTAL = 30;
-    static constexpr int CARNIVORE_MAX_TOTAL = 5;
+    static constexpr int CARNIVORE_MAX_TOTAL = 20;
     static constexpr int SPAWN_MAX_ATTEMPTS = 2000;
     static constexpr int SPAWN_INNER_ATTEMPTS = 200;
 };
-/*
-Suggested UI features to add (prioritized)
-
-Core HUD
-
-species counts (Plants / Herbivores / Carnivores) in top of sidebar (like worldold).
-play/pause button and simulation speed control (1x, 2x, 0.5x or slider).
-step/frame button for debugging single-step updates.
-Interaction Tools
-
-
-persistent Selected Entity panel that follows the entity by ID (already present) — add a “Follow” toggle to pan/zoom to tracked entity.
-a "Find by ID" input and "Center on entity" button.
-Entity & Tile Visuals
-
-on-hover tooltip showing species, health/energy, age (like worldold).
-draw health/energy bars above entities (normalized by species cap).
-orientation indicator (small rotation) and subtle bobbing/shadow to improve readability.
-Camera & View
-
-pan (arrow keys / mouse drag) and zoom in/out, with world coordinates shown in HUD.
-mini-map overview (optional).
-Diagnostics & Graphs
-
-time-series plot (counts vs time) for species populations.
-toggleable debug overlay: show occupied tile IDs, movementDelay values, RNG seed, FPS, entity count.
-performance stats (draw/update timings).
-Controls & Persistence
-
-random seed input + "regenerate" button for repeatability.
-save/load world state (serialize tiles + entities).
-Reset world button and adjustable initial spawn counts.
-UX polish
-
-use an in-project font and render sidebar text nicely (not just DrawText).
-disable spawn when clicked over water/rock, show feedback.
-confirmation dialogs for destructive actions (reset, erase many).
-Implementation hints mapped to existing code
-
-For plant-as-entity behavior, either:
-convert Tile-based grass to Entity::Plant (port worldold entity energy logic), or
-emulate plant energy/regen per tile but adopt dt-scaled growth and consumption rates from worldold.
-Add dt (frame time) to update pipeline to make reproduction/chance deterministic and frame-rate independent.
-Implement vertex-batch drawing for tiles (optional) to mimic worldold performance.
-Use const references when iterating entities in draw/UI to avoid copies (you already have some copies to fix).
-Keep occupancy updates consistent: when an entity dies, ensure its tile.freeOccupant() runs.
-If you want, next steps I can implement (pick one)
-
-Add tools palette and mouse/keyboard handling for spawning/editing tiles.
-Convert Tile grass to Plant entities (port stepPlants from worldold).
-Add interpolation smoothing for entity rendering (prevPos + interp).
-Implement sidebar species counts + mini charts.
-Which of these should I implement next?
-*/

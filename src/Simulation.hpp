@@ -27,8 +27,8 @@ class Simulation {
         : grid(height, width, cellSize), tmpGrid(height, width, cellSize),
           selectedRow(-1), selectedColumn(-1), sidebarWidth(sidebarWidth)
           {
-            animals.spawnHerbivoreGroups(grid, 30);
-            animals.spawnCarnivoreGroups(grid, 5);
+            animals.spawnHerbivoreGroups(grid, Constants::HERBIVORE_MAX_TOTAL);
+            animals.spawnCarnivoreGroups(grid, Constants::CARNIVORE_MAX_TOTAL);
           };
         void draw();
         void update();

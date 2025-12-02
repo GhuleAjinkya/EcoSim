@@ -1,4 +1,4 @@
-#include "Constants.hpp"
+#pragma once
 #include <vector>
 #include <cstdlib>
 #include <math.h>

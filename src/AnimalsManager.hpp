@@ -39,9 +39,8 @@ void AnimalsManager::spawnHerbivoreGroups(Grid& grid, int maxTotal) {
     int attempts = 0;
     while (total < maxTotal && attempts < Constants::SPAWN_MAX_ATTEMPTS) {
         ++attempts;
-        int groupSize = (rand() %  + 
-            (Constants::HERBIVORE_SPAWN_MAX_GROUP_SIZE) - Constants::HERBIVORE_SPAWN_MIN_GROUP_SIZE + 1) 
-            + Constants::HERBIVORE_SPAWN_MIN_GROUP_SIZE; 
+        int range = Constants::HERBIVORE_SPAWN_MAX_GROUP_SIZE - Constants::HERBIVORE_SPAWN_MIN_GROUP_SIZE + 1;
+        int groupSize = (rand() % range) + Constants::HERBIVORE_SPAWN_MIN_GROUP_SIZE;
         if (groupSize > (maxTotal - total)) groupSize = maxTotal - total;
 
         int cx = rand() % grid.getColumns();
@@ -54,9 +53,9 @@ void AnimalsManager::spawnHerbivoreGroups(Grid& grid, int maxTotal) {
 
         int placedAround = 1;
         int innerAttempts = 0;
-        while (placedAround < groupSize && Constants::SPAWN_INNER_ATTEMPTS < 200 && total < maxTotal) {
+        while (placedAround < groupSize && innerAttempts < Constants::SPAWN_INNER_ATTEMPTS && total < maxTotal) {
             ++innerAttempts;
-            int dx = (rand() % (Constants::HERBIVORE_SPAWN_CLUSTER_RADIUS * 2 + 1)) - Constants::HERBIVORE_SPAWN_CLUSTER_RADIUS; 
+            int dx = (rand() % (Constants::HERBIVORE_SPAWN_CLUSTER_RADIUS * 2 + 1)) - Constants::HERBIVORE_SPAWN_CLUSTER_RADIUS;
             int dy = (rand() % (Constants::HERBIVORE_SPAWN_CLUSTER_RADIUS * 2 + 1)) - Constants::HERBIVORE_SPAWN_CLUSTER_RADIUS;
             int nx = cx + dx;
             int ny = cy + dy;
@@ -74,7 +73,6 @@ void AnimalsManager::spawnCarnivoreGroups(Grid& grid, int maxTotal) {
     if (maxTotal <= 0) return;
     int total = 0;
     int attempts = 0;
-    const int maxAttempts = 2000;
     while (total < maxTotal && attempts < Constants::SPAWN_MAX_ATTEMPTS) {
         ++attempts;
 
@@ -89,16 +87,17 @@ void AnimalsManager::spawnCarnivoreGroups(Grid& grid, int maxTotal) {
 }
 
 void AnimalsManager::updateHerbivore(Entity &entity, Grid& grid) {
-    if (rand() % 5 == 0) entity.addHealth(-1);
+    if (Constants::HERBIVORE_DECAY_CHANCE > 0) {
+        if (rand() % (100 / Constants::HERBIVORE_DECAY_CHANCE) == 0) entity.addHealth(-Constants::HERBIVORE_HEALTH_DECAY);
+    }
     entity.tickAge();
 
-
-    const int searchRadius = 5;
+    const int searchRadius = Constants::HERBIVORE_SEARCH_RADIUS;
     bool foundFood = false;
     GridPos bestTarget = entity.getPos();
-    float bestDistSq = float(searchRadius*searchRadius) + 0.0001;
+    float bestDistSq = float(searchRadius*searchRadius) + 0.0001f;
 
-    if (entity.getHealth() <= 75) {
+    if (entity.getHealth() <= Constants::HERBIVORE_HUNT_HEALTH_THRESHOLD) {
         for (int dy = -searchRadius; dy <= searchRadius; ++dy) {
             for (int dx = -searchRadius; dx <= searchRadius; ++dx) {
                 int nx = entity.getPos().x + dx;
@@ -116,7 +115,6 @@ void AnimalsManager::updateHerbivore(Entity &entity, Grid& grid) {
             }
         }
     }
-    
 
     GridPos newPos = entity.getPos();
     if (foundFood) {
@@ -129,13 +127,13 @@ void AnimalsManager::updateHerbivore(Entity &entity, Grid& grid) {
         if (entity.getMovementDelay()) {
             entity.tickMovementDelay();
         } else {
-            if (rand() % 2 == 0) {
-            int dx = (rand() % 3) - 1; 
-            int dy = (rand() % 3) - 1;
-            newPos.x += dx;
-            newPos.y += dy;
-            entity.setMovementDelay(30);
-        }
+            if (Constants::HERBIVORE_WANDER_CHANCE > 0 && rand() % (100 / Constants::HERBIVORE_WANDER_CHANCE) == 0) {
+                int dx = (rand() % 3) - 1;
+                int dy = (rand() % 3) - 1;
+                newPos.x += dx;
+                newPos.y += dy;
+                entity.setMovementDelay(Constants::HERBIVORE_MOVEMENT_DELAY);
+            }
         }
     }
 
@@ -144,7 +142,6 @@ void AnimalsManager::updateHerbivore(Entity &entity, Grid& grid) {
 
     Tile &targetTile = grid.tiles[newPos.y][newPos.x];
     if (targetTile.getType() != TileType::Water && targetTile.getOccupiedID() == -1) {
-        // free previous tile occupancy
         GridPos old = entity.getPos();
         Tile &oldTile = grid.tiles[old.y][old.x];
         oldTile.freeOccupant();
@@ -153,15 +150,15 @@ void AnimalsManager::updateHerbivore(Entity &entity, Grid& grid) {
         targetTile.setOccupiedID(entity.getID());
     }
 
-    if (entity.getHealth() <= 50) {
+    if (entity.getHealth() <= Constants::HERBIVORE_FEED_HEALTH_THRESHOLD) {
         Tile &here = grid.tiles[entity.getPos().y][entity.getPos().x];
         if (here.getType() == TileType::Grass) {
             here.setType(TileType::Rock);
-            entity.addHealth(80);
+            entity.addHealth(Constants::HERBIVORE_FEED_GAIN);
         }
     }
-    if (entity.getHealth() >= 75 && entity.getAge() > 500) {
-        if ((rand() % 1000) < 2) { 
+    if (entity.getHealth() >= Constants::HERBIVORE_REPRODUCTION_HEALTH && entity.getAge() > Constants::HERBIVORE_REPRODUCTION_AGE) {
+        if ((rand() % 1000) < Constants::HERBIVORE_REPRODUCTION_CHANCE) {
             int nearbyCount = 0;
             for (Entity &o : entities) {
                 if (o.getSpecies() == entity.getSpecies()) {
@@ -170,8 +167,7 @@ void AnimalsManager::updateHerbivore(Entity &entity, Grid& grid) {
                     if (abs(dx) <= 5 && abs(dy) <= 5) nearbyCount++;
                 }
             }
-            int maxNearby = 4;
-            if (nearbyCount <= maxNearby) {
+            if (nearbyCount <= Constants::HERBIVORE_MAX_NEARBY_TO_REPRODUCE) {
                 bool spawned = false;
                 for (int dy = -1; dy <= 1 && !spawned; ++dy) {
                     for (int dx = -1; dx <= 1 && !spawned; ++dx) {
@@ -183,11 +179,9 @@ void AnimalsManager::updateHerbivore(Entity &entity, Grid& grid) {
                         if (tt.getType() == TileType::Water || tt.getType() == TileType::Rock) continue;
                         if (tt.getOccupiedID() != -1) continue;
                         int parentHealth = entity.getHealth();
-                        int childHealth = max(1, parentHealth * 35 / 100);
+                        int childHealth = max(1, parentHealth * Constants::HERBIVORE_CHILD_HEALTH_PCT / 100);
                         entity.setHealth(parentHealth - childHealth);
                         spawnEntity(Species::Herbivore, nx, ny, grid);
-                        tt.setOccupiedID(nextID);
-                        nextID++;
                         spawned = true;
                     }
                 }
@@ -197,15 +191,16 @@ void AnimalsManager::updateHerbivore(Entity &entity, Grid& grid) {
 }
 
 void AnimalsManager::updateCarnivore(Entity &entity, Grid& grid) {
-    if (rand() % 5 == 0) entity.addHealth(-1); 
+    if (Constants::CARNIVORE_DECAY_CHANCE > 0) {
+        if (rand() % (100 / Constants::CARNIVORE_DECAY_CHANCE) == 0) entity.addHealth(-Constants::CARNIVORE_HEALTH_DECAY);
+    }
     entity.tickAge();
 
-    const int searchRadius = 7;
+    const int searchRadius = Constants::CARNIVORE_SEARCH_RADIUS;
     bool foundPrey = false;
     GridPos bestTarget = entity.getPos();
     float bestDistSq = float(searchRadius*searchRadius) + 0.0001f;
 
-    // check if in mating phase
     bool inMatingPhase = false;
     int mateID = -1;
     if (matingPairs.find(entity.getID()) != matingPairs.end()) {
@@ -215,16 +210,15 @@ void AnimalsManager::updateCarnivore(Entity &entity, Grid& grid) {
     Entity *mate = nullptr;
 
     if (!inMatingPhase) {
-        // normal hunt behavior
-        if (entity.getHealth() <= 60) {
+        if (entity.getHealth() <= Constants::CARNIVORE_HUNT_HEALTH_THRESHOLD) {
             for (size_t i = 0; i < entities.size(); ++i) {
                 Entity &other = entities[i];
                 if (other.getSpecies() != Species::Herbivore) continue;
-                
+
                 int dx = other.getPos().x - entity.getPos().x;
                 int dy = other.getPos().y - entity.getPos().y;
                 float distSq = float(dx*dx + dy*dy);
-                
+
                 if (distSq < bestDistSq) {
                     bestDistSq = distSq;
                     bestTarget = other.getPos();
@@ -233,26 +227,25 @@ void AnimalsManager::updateCarnivore(Entity &entity, Grid& grid) {
             }
         }
 
-        // reproduction initiation: find nearest carnivore to mate with
-        if (entity.getHealth() > 70 && entity.getAge() > 750) {
-            int lastRepro = (lastReproduceAge.find(entity.getID()) != lastReproduceAge.end()) 
-                            ? lastReproduceAge[entity.getID()] : -750;
-            if (entity.getAge() - lastRepro >= 750) {
+        if (entity.getHealth() > Constants::CARNIVORE_MATE_HEALTH && entity.getAge() > Constants::CARNIVORE_MATE_AGE) {
+            int lastRepro = (lastReproduceAge.find(entity.getID()) != lastReproduceAge.end())
+                            ? lastReproduceAge[entity.getID()] : -Constants::CARNIVORE_MATE_COOLDOWN;
+            if (entity.getAge() - lastRepro >= Constants::CARNIVORE_MATE_COOLDOWN) {
                 float nearestMateDistSq = 999999.0f;
                 int nearestMateID = -1;
                 for (size_t i = 0; i < entities.size(); ++i) {
                     Entity &other = entities[i];
                     if (other.getSpecies() != Species::Carnivore || other.getID() == entity.getID()) continue;
-                    if (other.getHealth() <= 70 || other.getAge() <= 750) continue;
+                    if (other.getHealth() <= Constants::CARNIVORE_MATE_HEALTH || other.getAge() <= Constants::CARNIVORE_MATE_AGE) continue;
 
-                    int lastOtherRepro = (lastReproduceAge.find(other.getID()) != lastReproduceAge.end()) 
-                                         ? lastReproduceAge[other.getID()] : -750;
-                    if (other.getAge() - lastOtherRepro < 750) continue;
+                    int lastOtherRepro = (lastReproduceAge.find(other.getID()) != lastReproduceAge.end())
+                                         ? lastReproduceAge[other.getID()] : -Constants::CARNIVORE_MATE_COOLDOWN;
+                    if (other.getAge() - lastOtherRepro < Constants::CARNIVORE_MATE_COOLDOWN) continue;
 
                     int dx = other.getPos().x - entity.getPos().x;
                     int dy = other.getPos().y - entity.getPos().y;
                     float distSq = float(dx*dx + dy*dy);
-                    
+
                     if (distSq < nearestMateDistSq && matingPairs.find(other.getID()) == matingPairs.end()) {
                         nearestMateDistSq = distSq;
                         nearestMateID = other.getID();
@@ -270,10 +263,8 @@ void AnimalsManager::updateCarnivore(Entity &entity, Grid& grid) {
         }
     }
 
-    // movement
     GridPos newPos = entity.getPos();
     if (inMatingPhase && mateID != -1) {
-        // move toward mate
         for (int i = 0; i < entities.size(); ++i) {
             if (entities[i].getID() == mateID) {
                 mate = &entities[i];
@@ -296,12 +287,12 @@ void AnimalsManager::updateCarnivore(Entity &entity, Grid& grid) {
         if (entity.getMovementDelay()) {
             entity.tickMovementDelay();
         } else {
-            if (rand() % 2 == 0) {
+            if (Constants::CARNIVORE_WANDER_CHANCE > 0 && rand() % (100 / Constants::CARNIVORE_WANDER_CHANCE) == 0) {
                 int dx = (rand() % 3) - 1;
                 int dy = (rand() % 3) - 1;
                 newPos.x += dx;
                 newPos.y += dy;
-                entity.setMovementDelay(30);
+                entity.setMovementDelay(Constants::CARNIVORE_MOVEMENT_DELAY);
             }
         }
     }
@@ -323,12 +314,10 @@ void AnimalsManager::updateCarnivore(Entity &entity, Grid& grid) {
         if (mate) {
             int dx = abs(mate->getPos().x - entity.getPos().x);
             int dy = abs(mate->getPos().y - entity.getPos().y);
-            if (dx <= 3 && dy <= 3) {
-                // spawn offspring at midpoint or nearby
+            if (dx <= Constants::CARNIVORE_MATE_PROXIMITY && dy <= Constants::CARNIVORE_MATE_PROXIMITY) {
                 int spawnX = (entity.getPos().x + mate->getPos().x) / 2;
                 int spawnY = (entity.getPos().y + mate->getPos().y) / 2;
 
-                // find empty adjacent tile for offspring
                 bool spawned = false;
                 for (int sy = -1; sy <= 1 && !spawned; ++sy) {
                     for (int sx = -1; sx <= 1 && !spawned; ++sx) {
@@ -339,9 +328,7 @@ void AnimalsManager::updateCarnivore(Entity &entity, Grid& grid) {
                         if (tt.getType() == TileType::Water || tt.getType() == TileType::Rock) continue;
                         if (tt.getOccupiedID() != -1) continue;
 
-                        // create offspring with reduced health
                         spawnEntity(Species::Carnivore, nx, ny, grid);
-                        tt.setOccupiedID(nextID - 1);
 
                         lastReproduceAge[entity.getID()] = entity.getAge();
                         lastReproduceAge[mateID] = mate->getAge();
@@ -356,21 +343,21 @@ void AnimalsManager::updateCarnivore(Entity &entity, Grid& grid) {
         }
     }
 
-    if (!inMatingPhase && entity.getHealth() <= 40) {
+    if (!inMatingPhase && entity.getHealth() <= Constants::CARNIVORE_ATTACK_HEALTH_THRESHOLD) {
         for (int i = 0; i < entities.size(); ++i) {
             Entity &other = entities[i];
             if (other.getSpecies() != Species::Herbivore) continue;
-            
+
             int dx = abs(other.getPos().x - entity.getPos().x);
             int dy = abs(other.getPos().y - entity.getPos().y);
             if (dx <= 1 && dy <= 1) {
-                other.addHealth(-150); 
-                entity.addHealth(75); 
+                other.addHealth(-Constants::CARNIVORE_ATTACK_DAMAGE);
+                entity.addHealth(Constants::CARNIVORE_ATTACK_GAIN);
             }
         }
     }
 
-    if (entity.getHealth() > 120) entity.setHealth(120);
+    if (entity.getHealth() > Constants::CARNIVORE_MAX_HEALTH) entity.setHealth(Constants::CARNIVORE_MAX_HEALTH);
 }
 
 void AnimalsManager::update(Grid& grid) {
