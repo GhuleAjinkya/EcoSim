@@ -1,5 +1,4 @@
 #include "raylib.h"
-#include "resource_dir.h"	
 #include "Simulation.hpp"
 
 int main() {

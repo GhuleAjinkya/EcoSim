@@ -4,6 +4,7 @@
 #include "Tile.hpp"
 using namespace std;
 
+int seed = 4;
 class Grid {
         int rows;
         int columns;
@@ -11,14 +12,14 @@ class Grid {
     public:
         vector<vector<Tile>> tiles;
         Grid(int, int, int);
-        void initialize(int seed); 
+        void initialize(); 
         void draw();
         int getRows() {return rows;}
         int getColumns() {return columns;}
         int getCellSize() {return cellSize;}
 };
 
-void Grid::initialize(int seed) {
+void Grid::initialize() {
     srand(seed);
     
     // First pass: Create base terrain
@@ -32,7 +33,7 @@ void Grid::initialize(int seed) {
     // lake
     int centerX = rand() % rows;
     int centerY = rand() % columns;
-    int lakeSize = rand() % 6 + 6; // 4-9 radius
+    int lakeSize = rand() % 6 + 6; 
 
     for (int dx = -lakeSize; dx <= lakeSize; dx++) {
         for (int dy = -lakeSize; dy <= lakeSize; dy++) {
@@ -48,7 +49,7 @@ void Grid::initialize(int seed) {
         }
     }
     
-    // Add grass in an 8-block radius around water
+    // Grass
     for (int row = 0; row < rows; row++) {
         for (int col = 0; col < columns; col++) {
             if (tiles[row][col].getType() == TileType::Water) {
@@ -70,33 +71,6 @@ void Grid::initialize(int seed) {
         }
     }
 
-    /*
-    // Generate rocky areas
-    int numRockAreas = rand() % 4 + 2; // 2-5 rock formations
-    for (int rock = 0; rock < numRockAreas; rock++) {
-        int centerX = rand() % rows;
-        int centerY = rand() % columns;
-        int rockSize = rand() % 4 + 2; // 2-5 radius
-        
-        // Create irregular rock formations
-        for (int dx = -rockSize; dx <= rockSize; dx++) {
-            for (int dy = -rockSize; dy <= rockSize; dy++) {
-                int newX = centerX + dx;
-                int newY = centerY + dy;
-                
-                // Check bounds
-                if (newX >= 0 && newX < rows && newY >= 0 && newY < columns) {
-                    // Only place rocks on grass (not in water)
-                    if (tiles[newX][newY].getType() == TileType::Grass) {
-                        float distance = sqrt(dx*dx + dy*dy);
-                        if (distance <= rockSize + (rand() % 2)) {
-                            tiles[newX][newY].setType(TileType::Rock);
-                        }
-                    }
-                }
-            }
-        }
-    } */
 }
 
 
@@ -105,7 +79,7 @@ Grid::Grid(int height, int width, int cellSize) {
     rows = height / this->cellSize;
     columns = width / this->cellSize;
     tiles = vector<vector<Tile>>(rows, vector<Tile>(columns));
-    initialize(35);
+    initialize();
 }
 
 void Grid::draw() {
