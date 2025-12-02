@@ -37,10 +37,11 @@ void AnimalsManager::spawnHerbivoreGroups(Grid& grid, int maxTotal) {
     if (maxTotal <= 0) return;
     int total = 0;
     int attempts = 0;
-    const int maxAttempts = 2000;
-    while (total < maxTotal && attempts < maxAttempts) {
+    while (total < maxTotal && attempts < Constants::SPAWN_MAX_ATTEMPTS) {
         ++attempts;
-        int groupSize = (rand() % 4) + 2; 
+        int groupSize = (rand() %  + 
+            (Constants::HERBIVORE_SPAWN_MAX_GROUP_SIZE) - Constants::HERBIVORE_SPAWN_MIN_GROUP_SIZE + 1) 
+            + Constants::HERBIVORE_SPAWN_MIN_GROUP_SIZE; 
         if (groupSize > (maxTotal - total)) groupSize = maxTotal - total;
 
         int cx = rand() % grid.getColumns();
@@ -53,10 +54,10 @@ void AnimalsManager::spawnHerbivoreGroups(Grid& grid, int maxTotal) {
 
         int placedAround = 1;
         int innerAttempts = 0;
-        while (placedAround < groupSize && innerAttempts < 200 && total < maxTotal) {
+        while (placedAround < groupSize && Constants::SPAWN_INNER_ATTEMPTS < 200 && total < maxTotal) {
             ++innerAttempts;
-            int dx = (rand() % 5) - 2; 
-            int dy = (rand() % 5) - 2;
+            int dx = (rand() % (Constants::HERBIVORE_SPAWN_CLUSTER_RADIUS * 2 + 1)) - Constants::HERBIVORE_SPAWN_CLUSTER_RADIUS; 
+            int dy = (rand() % (Constants::HERBIVORE_SPAWN_CLUSTER_RADIUS * 2 + 1)) - Constants::HERBIVORE_SPAWN_CLUSTER_RADIUS;
             int nx = cx + dx;
             int ny = cy + dy;
             if (nx < 0 || ny < 0 || nx >= grid.getColumns() || ny >= grid.getRows()) continue;
@@ -74,7 +75,7 @@ void AnimalsManager::spawnCarnivoreGroups(Grid& grid, int maxTotal) {
     int total = 0;
     int attempts = 0;
     const int maxAttempts = 2000;
-    while (total < maxTotal && attempts < maxAttempts) {
+    while (total < maxTotal && attempts < Constants::SPAWN_MAX_ATTEMPTS) {
         ++attempts;
 
         int cx = rand() % grid.getColumns();

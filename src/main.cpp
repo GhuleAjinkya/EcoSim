@@ -7,10 +7,10 @@ int main() {
     const int screenHeight = 950;
     const int cellSize = 20;
     const int sidebarWidth = 200;
-
+    const int toolbarWidth = 50;
     Simulation simulation(screenHeight, screenWidth, cellSize, sidebarWidth);
     
-    InitWindow(screenWidth + sidebarWidth, screenHeight, "Ecosystem Simulation");
+    InitWindow(screenWidth + sidebarWidth + toolbarWidth, screenHeight, "Ecosystem Simulation");
     SetTargetFPS(FPS);
     
     while (!WindowShouldClose()) {

@@ -1,3 +1,4 @@
+#include "Constants.hpp"
 #include <vector>
 #include <cstdlib>
 #include <math.h>
@@ -20,7 +21,7 @@ class Grid {
 };
 
 void Grid::initialize() {
-    srand(seed);
+    srand(Constants::GRID_SEED);
     
     // First pass: Create base terrain
     for (int row = 0; row < rows; row++) {

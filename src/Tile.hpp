@@ -1,6 +1,6 @@
 #include <raylib.h>
-
-int decayCooldown = 12;
+#include "Constants.hpp"
+int decayCooldown = Constants::TILE_DECAY_COOLDOWN;
 
 enum TileType {
     Grass,
@@ -55,7 +55,7 @@ void Tile::update(int surrGrass) {
         if (health <= 0) {
             if (!decayCooldown) {
                 setType(TileType::Rock);
-                decayCooldown = 12;
+                decayCooldown = Constants::TILE_DECAY_COOLDOWN;
             }
             else decayCooldown--;
 

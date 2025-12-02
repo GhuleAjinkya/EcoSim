@@ -41,7 +41,9 @@ Color Entity::getColor() {
 
 void Entity::addHealth(int val) {
     health += val;
-    int maxHealth = (species == Species::Herbivore) ? 100 : 120;
+    int maxHealth = (species == Species::Herbivore) ? 
+        Constants::HERBIVORE_MAX_HEALTH 
+        : Constants::CARNIVORE_MAX_HEALTH;
     if (health < 0) health = 0;
     if (health > maxHealth) health = maxHealth;
 }
