@@ -10,7 +10,7 @@ class Entity {
     GridPos pos;
     Species species;
     bool canReproduce = false;
-    int movementDelay = 30;
+    int movementDelay = 50;
     public:
         Entity(int setID, int x, int y, int setHealth, Species setSpecies) 
         : pos{x,y}, health(setHealth), id(setID), species(setSpecies) {}
@@ -41,7 +41,6 @@ Color Entity::getColor() {
 
 void Entity::addHealth(int val) {
     health += val;
-    // clamp to valid range [0, maxHealth] to prevent overflow/underflow
     int maxHealth = (species == Species::Herbivore) ? 100 : 120;
     if (health < 0) health = 0;
     if (health > maxHealth) health = maxHealth;

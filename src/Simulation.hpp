@@ -21,18 +21,10 @@ class Simulation {
           };
         void draw();
         void update();
+        void drawSidebar();
 };
 
-void Simulation::draw() {
-    grid.draw();
-
-    for (Entity& e : animals.getEntities()) {
-        int px = e.getPos().x * grid.getCellSize();
-        int py = e.getPos().y * grid.getCellSize();
-        int offset = grid.getCellSize() / 2;
-        DrawCircle(px + offset, py+offset, (grid.getCellSize() / 2) - 3 , e.getColor());
-    }
-
+void Simulation::drawSidebar() {
     int sidebarX = grid.getColumns() * grid.getCellSize();
     int screenH = GetScreenHeight();
     DrawRectangle(sidebarX, 0, sidebarWidth, screenH, LIGHTGRAY);
@@ -99,6 +91,19 @@ void Simulation::draw() {
     } else {
         DrawText("No entity selected", sidebarX + 10, entitySectionY + 40, 18, DARKGRAY);
     }
+}
+
+void Simulation::draw() {
+    grid.draw();
+
+    for (Entity& e : animals.getEntities()) {
+        int px = e.getPos().x * grid.getCellSize();
+        int py = e.getPos().y * grid.getCellSize();
+        int offset = grid.getCellSize() / 2;
+        DrawCircle(px + offset, py+offset, (grid.getCellSize() / 2) - 3 , e.getColor());
+    }
+    drawSidebar();
+    
 }
 
 int getSurrGrass(int i, int j, Grid& grid) {

@@ -4,7 +4,7 @@
 #include "Tile.hpp"
 using namespace std;
 
-int seed = 4;
+int seed = 70;
 class Grid {
         int rows;
         int columns;
