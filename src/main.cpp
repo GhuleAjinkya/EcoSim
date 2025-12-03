@@ -14,7 +14,6 @@ int main() {
     SetTargetFPS(FPS);
     while (!WindowShouldClose()) {
         BeginDrawing();
-            
             ClearBackground(BLACK);
             simulation.draw();
             simulation.update();

@@ -5,8 +5,7 @@
 #include "Tile.hpp"
 using namespace std;
 
-int seed = 70;
-class Grid {
+class Grid : public Tile{
         int rows;
         int columns;
         int cellSize;

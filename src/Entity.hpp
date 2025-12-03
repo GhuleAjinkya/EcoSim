@@ -13,9 +13,18 @@ class Entity {
     Species species;
     bool canReproduce = false;
     int movementDelay = 50;
+    static int herbivoreCount;
+    static int carnivoreCount;
     public:
         Entity(int setID, int x, int y, int setHealth, Species setSpecies) 
-        : pos{x,y}, health(setHealth), id(setID), species(setSpecies) {}
+        : pos{x,y}, health(setHealth), id(setID), species(setSpecies) {
+            if (species == Species::Carnivore) {
+                carnivoreCount++;
+            } else {
+                herbivoreCount++;
+            }
+        }
+        Entity() {};
         ~Entity() {};
         int getID() {return id;}
         Color getColor();
@@ -31,6 +40,9 @@ class Entity {
         void setMovementDelay(int val) {movementDelay = val;}
         void setHealth(int val) {health = val;}
 };
+
+int Entity::herbivoreCount = 0;
+int Entity::carnivoreCount = 0;
 
 void Entity::tickMovementDelay() {
     if (movementDelay > 0) movementDelay--;

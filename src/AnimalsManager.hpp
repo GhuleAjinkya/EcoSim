@@ -10,7 +10,7 @@ bool posEquals(GridPos a, GridPos b) {
     return a.x==b.x && a.y==b.y;
 }
 
-class AnimalsManager {
+class AnimalsManager : public Entity{
     vector<Entity> entities;
     void updateHerbivore(Entity&, Grid&);
     void updateCarnivore(Entity&, Grid&);
@@ -38,7 +38,7 @@ void AnimalsManager::spawnHerbivoreGroups(Grid& grid, int maxTotal) {
     int total = 0;
     int attempts = 0;
     while (total < maxTotal && attempts < Constants::SPAWN_MAX_ATTEMPTS) {
-        ++attempts;
+        attempts++;
         int range = Constants::HERBIVORE_SPAWN_MAX_GROUP_SIZE - Constants::HERBIVORE_SPAWN_MIN_GROUP_SIZE + 1;
         int groupSize = (rand() % range) + Constants::HERBIVORE_SPAWN_MIN_GROUP_SIZE;
         if (groupSize > (maxTotal - total)) groupSize = maxTotal - total;
@@ -49,12 +49,12 @@ void AnimalsManager::spawnHerbivoreGroups(Grid& grid, int maxTotal) {
         if (grid.tiles[cy][cx].getOccupiedID() != -1) continue;
 
         spawnEntity(Species::Herbivore, cx, cy, grid);
-        ++total;
+        total++;
 
         int placedAround = 1;
         int innerAttempts = 0;
         while (placedAround < groupSize && innerAttempts < Constants::SPAWN_INNER_ATTEMPTS && total < maxTotal) {
-            ++innerAttempts;
+            innerAttempts++;
             int dx = (rand() % (Constants::HERBIVORE_SPAWN_CLUSTER_RADIUS * 2 + 1)) - Constants::HERBIVORE_SPAWN_CLUSTER_RADIUS;
             int dy = (rand() % (Constants::HERBIVORE_SPAWN_CLUSTER_RADIUS * 2 + 1)) - Constants::HERBIVORE_SPAWN_CLUSTER_RADIUS;
             int nx = cx + dx;
@@ -63,8 +63,8 @@ void AnimalsManager::spawnHerbivoreGroups(Grid& grid, int maxTotal) {
             if (grid.tiles[ny][nx].getType() == TileType::Water || grid.tiles[ny][nx].getType() == TileType::Rock) continue;
             if (grid.tiles[ny][nx].getOccupiedID() != -1) continue;
             spawnEntity(Species::Herbivore, nx, ny, grid);
-            ++placedAround;
-            ++total;
+            placedAround++;
+            total++;
         }
     }
 }
@@ -74,7 +74,7 @@ void AnimalsManager::spawnCarnivoreGroups(Grid& grid, int maxTotal) {
     int total = 0;
     int attempts = 0;
     while (total < maxTotal && attempts < Constants::SPAWN_MAX_ATTEMPTS) {
-        ++attempts;
+        attempts++;
 
         int cx = rand() % grid.getColumns();
         int cy = rand() % grid.getRows();
@@ -82,7 +82,7 @@ void AnimalsManager::spawnCarnivoreGroups(Grid& grid, int maxTotal) {
         if (grid.tiles[cy][cx].getOccupiedID() != -1) continue;
 
         spawnEntity(Species::Carnivore, cx, cy, grid);
-        ++total;
+        total++;
     }
 }
 

@@ -1,4 +1,3 @@
-#pragma once
 #include <raylib.h>
 #include "Constants.hpp"
 int decayCooldown = Constants::TILE_DECAY_COOLDOWN;
