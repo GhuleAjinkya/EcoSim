@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include <algorithm>
 #include "Constants.hpp"
+
 struct GridPos { int x = 0; int y = 0; };
 enum class Species {Herbivore, Carnivore};
 class Entity {

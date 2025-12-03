@@ -39,53 +39,46 @@ class Simulation {
 
 void Simulation::drawToolbar() {
     int sidebarX = grid.getColumns() * grid.getCellSize();
-    int toolbarX = sidebarX + sidebarWidth;  // toolbar is RIGHT of sidebar
+    int toolbarX = sidebarX + sidebarWidth; 
     int toolbarWidth = 50;
     int screenH = GetScreenHeight();
     
     DrawRectangle(toolbarX, 0, toolbarWidth, screenH, DARKGRAY);
     
-    // Button size and spacing
     int buttonSize = 40;
     int buttonSpacing = 5;
     int startY = 10;
     
-    // Button 1: Place Herbivore (yellow circle)
     Rectangle herbButton = {(float)toolbarX + 5, (float)startY, (float)buttonSize, (float)buttonSize};
     DrawRectangle((int)herbButton.x, (int)herbButton.y, (int)herbButton.width, (int)herbButton.height, 
                   activeTool == Tool::PlaceHerbivore ? LIME : DARKGRAY);
     DrawCircle((int)(herbButton.x + buttonSize/2), (int)(herbButton.y + buttonSize/2), 12, {255, 255, 0, 255});
     DrawRectangleLines((int)herbButton.x, (int)herbButton.y, (int)herbButton.width, (int)herbButton.height, WHITE);
     
-    // Button 2: Place Carnivore (red circle)
     Rectangle carnButton = {(float)toolbarX + 5, (float)(startY + buttonSize + buttonSpacing), (float)buttonSize, (float)buttonSize};
     DrawRectangle((int)carnButton.x, (int)carnButton.y, (int)carnButton.width, (int)carnButton.height, 
                   activeTool == Tool::PlaceCarnivore ? LIME : DARKGRAY);
     DrawCircle((int)(carnButton.x + buttonSize/2), (int)(carnButton.y + buttonSize/2), 12, {255, 0, 0, 255});
     DrawRectangleLines((int)carnButton.x, (int)carnButton.y, (int)carnButton.width, (int)carnButton.height, WHITE);
     
-    // Button 3: Set Grass (green square)
     Rectangle grassButton = {(float)toolbarX + 5, (float)(startY + 2*(buttonSize + buttonSpacing)), (float)buttonSize, (float)buttonSize};
     DrawRectangle((int)grassButton.x, (int)grassButton.y, (int)grassButton.width, (int)grassButton.height, 
                   activeTool == Tool::SetGrass ? LIME : DARKGRAY);
     DrawRectangle((int)(grassButton.x + 5), (int)(grassButton.y + 5), buttonSize - 10, buttonSize - 10, {21, 191, 64, 255});
     DrawRectangleLines((int)grassButton.x, (int)grassButton.y, (int)grassButton.width, (int)grassButton.height, WHITE);
     
-    // Button 4: Set Water (blue square)
     Rectangle waterButton = {(float)toolbarX + 5, (float)(startY + 3*(buttonSize + buttonSpacing)), (float)buttonSize, (float)buttonSize};
     DrawRectangle((int)waterButton.x, (int)waterButton.y, (int)waterButton.width, (int)waterButton.height, 
                   activeTool == Tool::SetWater ? LIME : DARKGRAY);
     DrawRectangle((int)(waterButton.x + 5), (int)(waterButton.y + 5), buttonSize - 10, buttonSize - 10, {0, 0, 255, 255});
     DrawRectangleLines((int)waterButton.x, (int)waterButton.y, (int)waterButton.width, (int)waterButton.height, WHITE);
     
-    // Button 5: Set Rock (brown square)
     Rectangle rockButton = {(float)toolbarX + 5, (float)(startY + 4*(buttonSize + buttonSpacing)), (float)buttonSize, (float)buttonSize};
     DrawRectangle((int)rockButton.x, (int)rockButton.y, (int)rockButton.width, (int)rockButton.height, 
                   activeTool == Tool::SetRock ? LIME : DARKGRAY);
     DrawRectangle((int)(rockButton.x + 5), (int)(rockButton.y + 5), buttonSize - 10, buttonSize - 10, {76, 50, 33, 255});
     DrawRectangleLines((int)rockButton.x, (int)rockButton.y, (int)rockButton.width, (int)rockButton.height, WHITE);
     
-    // Handle button clicks
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         Vector2 mp = GetMousePosition();
         if (CheckCollisionPointRec(mp, herbButton)) {
@@ -208,6 +201,26 @@ void Simulation::drawSidebar() {
     } else {
         DrawText("No entity selected", sidebarX + 10, entitySectionY + 40, 18, DARKGRAY);
     }
+
+    int countSectionY = screenH - 100;
+    DrawText("Population", sidebarX + 10, countSectionY, 20, BLACK);
+
+    int herbivoreCount = 0;
+    int carnivoreCount = 0;
+    for (Entity e : animals.getEntities()) {
+        if (e.getSpecies() == Species::Herbivore) {
+            herbivoreCount++;
+        } else {
+            carnivoreCount++;
+        }
+    }
+
+    char buf[128];
+    sprintf(buf, "Herbivores: %d", herbivoreCount);
+    DrawText(buf, sidebarX + 10, countSectionY + 30, 16, {255, 255, 0, 255});
+
+    sprintf(buf, "Carnivores: %d", carnivoreCount);
+    DrawText(buf, sidebarX + 10, countSectionY + 55, 16, {255, 0, 0, 255});
 }
 
 void Simulation::draw() {
